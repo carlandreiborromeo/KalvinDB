@@ -39,19 +39,12 @@ app.post('/enroll', async (req, res) => {
   const { name, date_of_birth, course, email, phone_number } = req.body;
 
   try {
-    const pool = await sql.connect(config);
-    const query = `
+    await sql.connect(config);
+    await sql.query
       INSERT INTO enrollments (name, date_of_birth, course, email, phone_number)
-      VALUES (@name, @date_of_birth, @course, @name, @phone_number)
-    `;
-    const request = pool.request();
-    request.input('name', sql.NVarChar, name);
-    request.input('date_of_birth', sql.Date, date_of_birth);
-    request.input('course', sql.NVarChar, course);
-    request.input('email', sql.NVarChar, email);
-    request.input('phone_number', sql.NVarChar, phone_number);
+      VALUES (${name}, ${date_of_birth}, ${course}, ${email}, ${phone_number})
+    ;
 
-    await request.query(query);
     res.status(201).json({ msg: 'Enrollment data saved successfully' });
   } catch (err) {
     console.error('Error saving enrollment data:', err.message);
@@ -61,5 +54,6 @@ app.post('/enroll', async (req, res) => {
 
 // Start the server
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+  console.log(Server is running on port ${port});
 });
+
