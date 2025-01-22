@@ -26,13 +26,13 @@ app.get("/", (req, res) => {
   res.send("App is running and healthy.");
 });
 
-// Route to get all posts
-app.get("/posts", async (req, res) => {
+// Route to get all enrollment records
+app.get("/enrollment", async (req, res) => {
   try {
     const pool = await sql.connect(dbConfig); // Connect to Azure SQL
     const result = await pool
       .request()
-      .query("SELECT * FROM posts ORDER BY date DESC");
+      .query("SELECT * FROM enrollment ORDER BY id DESC");
     res.json(result.recordset); // Return the query results
   } catch (err) {
     console.error("Error querying the database:", err.message);
@@ -40,28 +40,26 @@ app.get("/posts", async (req, res) => {
   }
 });
 
-// Route to create a new post
-app.post("/posts", async (req, res) => {
-  const { from, to, content, date } = req.body;
+// Route to create a new enrollment record
+app.post("/enrollment", async (req, res) => {
+  const { name, date_of_birth, course, email, phone_number } = req.body;
 
   try {
     const pool = await sql.connect(dbConfig); // Connect to Azure SQL
     const result = await pool
       .request()
-      .input("from", sql.NVarChar, from)
-      .input("to", sql.NVarChar, to)
-      .input("content", sql.NVarChar, content)
-      .input("date", sql.DateTime, date)
+      .input("name", sql.NVarChar, name)
+      .input("date_of_birth", sql.Date, date_of_birth)
+      .input("course", sql.NVarChar, course)
+      .input("email", sql.NVarChar, email)
+      .input("phone_number", sql.NVarChar, phone_number)
       .query(
-        "INSERT INTO posts (from_name, to_name, content, date) VALUES (@from, @to, @content, @date)"
+        "INSERT INTO enrollment (name, date_of_birth, course, email, phone_number) VALUES (@name, @date_of_birth, @course, @email, @phone_number)"
       );
 
     res.status(201).json({
-      id: result.rowsAffected[0], // Get the affected row count or the inserted ID
-      from,
-      to,
-      content,
-      date,
+      message: "Enrollment created successfully",
+      data: { name, date_of_birth, course, email, phone_number },
     });
   } catch (err) {
     console.error("Error inserting into the database:", err.message);
@@ -73,3 +71,4 @@ app.post("/posts", async (req, res) => {
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
+
